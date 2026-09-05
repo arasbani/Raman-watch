@@ -35,6 +35,72 @@ async def handle_photo(message: types.Message, state: FSMContext):
 
         await message.answer(
             "📸 تم استلام صورة الساعة بنجاح.\n\n"
+            "يرجى تحديد فئة السعر الخاصة بهذا الموديل:",
+            reply_markup=builder.as_markup()
+        )
+        await state.set_state(OrderState.choosing_category)
+    else:
+        await message.answer("الرجاء إرسال صورة الساعة المطلوبة لنستكمل الطلب.")
+
+@dp.callback_query(lambda c: c.data.startswith("cat_"))
+async def process_category(callback: types.CallbackQuery, state: FSMContext):
+    cat_type = callback.data.split("_")[1]
+    await state.update_data(cat_type=cat_type)
+    
+    if cat_type == "usd":
+        text = "أدخل السعر بالدولار للقطعة الواحدة (مثلاً: 8.5 أو 11):"
+    elif cat_type == "iqd":
+        text = "أدخل السعر بالدينار العراقي للقطعة (مثلاً: 8500):"
+    else:
+        text = "أدخل سعر العرض أو الزوج:"
+
+    await callback.message.answer(text)
+    await state.set_state(OrderState.waiting_for_quantity)
+    await callback.answer()
+
+@dp.message(OrderState.waiting_for_quantity)
+async def process_price_and_calc(message: types.Message, state: FSMContext):
+    data = await state.get_data()
+    
+    # إذا لم يتم حفظ السعر بعد، نقوم بحفظه أولاً ثم نطلب الكمية
+    if "unit_price" not in data:
+        try:
+            unit_price = float(message.text)
+        except ValueError:
+            await message.answer("الرجاء إدخال رقم صحيح للسعر.")
+            return
+
+        await state.update_data(unit_price=unit_price)
+        await message.answer("كم عدد القطع أو الكمية المطلوبة بهذا السعر؟ (اكتب الرقم فقط، مثلاً: 12)")
+        return
+
+    # إذا كان السعر مخزناً مسبقاً، فهذه الرسالة تمثل الكمية ويتم الحساب النهائي
+    if not message.text.isdigit():
+        await message.answer("الرجاء إدخال رقم صحيح للكمية.")
+        return
+    
+    qty = int(message.text)
+    unit_price = data.get("unit_price")
+    cat = data.get("cat_type")
+    
+    total = qty * unit_price
+    currency = "$" if cat == "usd" else "د.ع"
+    
+    await message.answer(
+        "✅ **تم حساب الطلب بنجاح!**\n\n"
+        f"📦 الكمية: {qty}\n"
+        f"💰 المجموع الكلي: {total} {currency}\n\n"
+        "شكراً لتسوقك في معرض رامان للساعات. سيتم التواصل معك لتأكيد الطلب."
+    )
+    await state.clear()
+
+async def main():
+    await dp.start_polling(bot)
+
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
+    asyncio.run(main())
+            "📸 تم استلام صورة الساعة بنجاح.\n\n"
             "يرجى تحديد فئة السعر الخاصة بهذا الموديل من القناة:",
             reply_markup=builder.as_markup()
         )
