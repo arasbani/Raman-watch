@@ -71,7 +71,7 @@ async def process_photos(message: types.Message, state: FSMContext):
 async def main():
     await dp.start_polling(bot)
 
-If __name__ == "__main__":
+if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     asyncio.run(main())
   
