@@ -13,6 +13,42 @@ UPLOAD_DIR = BASE_DIR / "static" / "uploads"
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 app = Flask(__name__)
+@app.route("/privacy")
+def privacy():
+    return """
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <title>Privacy Policy - Arbil Watches</title>
+    </head>
+    <body style="font-family:Arial;max-width:800px;margin:40px auto;padding:20px;line-height:1.7">
+        <h1>Privacy Policy - Arbil Watches</h1>
+
+        <p>Arbil Watches respects your privacy.</p>
+
+        <h2>Information We Collect</h2>
+        <p>When you contact us through WhatsApp, we may receive your phone number,
+        name, messages, and order information that you voluntarily provide.</p>
+
+        <h2>How We Use Information</h2>
+        <p>We use this information only to communicate with customers,
+        process orders, provide product information, and improve our service.</p>
+
+        <h2>Data Sharing</h2>
+        <p>We do not sell your personal information to third parties.</p>
+
+        <h2>Data Retention</h2>
+        <p>We retain information only as reasonably necessary for customer service,
+        orders, and business records.</p>
+
+        <h2>Contact</h2>
+        <p>For privacy questions, please contact Arbil Watches through our official
+        WhatsApp contact.</p>
+
+        <p>Last updated: September 2026</p>
+    </body>
+    </html>
+    """
 app.secret_key = os.getenv("FLASK_SECRET_KEY", os.urandom(24))
 
 WA_TOKEN = os.getenv("WHATSAPP_TOKEN", "")
