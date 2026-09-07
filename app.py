@@ -104,6 +104,7 @@ def wa_headers():
     return {"Authorization": f"Bearer {WA_TOKEN}"}
 
 def send_text(to, body):
+    print("WA TO:", to)
     if not WA_TOKEN or not PHONE_NUMBER_ID:
         print("WhatsApp credentials are not configured.")
         return
